@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Gestión de Items</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+        }
+        form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        form input[type="text"], form input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        form input[type="text"] {
+            background-color: #f5f5f5;
+            color: #555;
+            font-weight: bold;
+        }
+        form input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        #addItemBtn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Aplicación de Gestión de Items</h1>
+    <form id="itemForm">
+        <label for="uploadDate">Fecha de Subida:</label>
+        <input type="text" id="uploadDate" name="uploadDate" readonly style="background-color: #f5f5f5; color: #555;">
+        <label for="uploadTime">Hora de Subida:</label>
+        <input type="text" id="uploadTime" name="uploadTime" readonly style="background-color: #f5f5f5; color: #555;">
+        <label for="uploadedBy">Subido por:</label>
+        <input type="text" id="uploadedBy" name="uploadedBy" required>
+        <label for="event">Evento:</label>
+        <input type="text" id="event" name="event" required>
+        
+        <div id="itemFields">
+            <div class="itemField">
+                <label for="itemCode">Código del Item:</label>
+                <input type="text" class="itemCode" name="itemCode" required>
+            </div>
+        </div>
+        <button type="button" id="addItemBtn">Agregar Item</button>
+        <input type="submit" value="Guardar">
+    </form>
+    <div id="message"></div>
+</div>
+
+<script>
+    // Función para obtener la fecha y hora actual
+    function getCurrentDateTime() {
+        var now = new Date();
+        var date = now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0') + '-' + now.getDate().toString().padStart(2, '0');
+        var time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+        return { date: date, time: time };
+    }
+
+    // Llenar automáticamente los campos de fecha y hora
+    var dateTime = getCurrentDateTime();
+    document.getElementById('uploadDate').value = dateTime.date;
+    document.getElementById('uploadTime').value = dateTime.time;
+
+    document.getElementById('addItemBtn').addEventListener('click', function() {
+        var itemFields = document.getElementById('itemFields');
+        var newItemField = document.createElement('div');
+        newItemField.classList.add('itemField');
+        newItemField.innerHTML = `
+            <label for="itemCode">Código del Item:</label>
+            <input type="text" class="itemCode" name="itemCode" required>
+        `;
+        itemFields.appendChild(newItemField);
+    });
+
+    document.getElementById('itemForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        var jsonData = {};
+        formData.forEach(function(value, key){
+            jsonData[key] = value;
+        });
+
+        fetch('https://script.google.com/macros/s/AKfycbxriNFQ0ceY6-aVu2Y2GdpzoHjFWaS5SXG0rnxIBMLVE-4RJFyyKk8uX3lxH-NsSsLx/exec', {
+            method: 'POST',
+            body: JSON.stringify(jsonData),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('message').innerHTML = '<p>' + data + '</p>';
+            document.getElementById('itemForm').reset();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>
